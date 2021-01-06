@@ -1,7 +1,6 @@
 PImage img;
 PImage playe;
-
-   PImage ver ;
+PImage ver ;
 
 
 int playerXCor = 400;
