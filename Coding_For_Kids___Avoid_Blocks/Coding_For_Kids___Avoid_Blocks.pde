@@ -1,10 +1,9 @@
-// coins to disappear
-// rocks   
-// score  show score 
-// hearts /levels 
-//button red
-
+// coins to disappear  =>  done
+// rocks               => doen
+// score  show score   =>doen
 // meetings ---> 5pm
+//meeting has been done and all tasks implmented 
+//thanks to project team Arwa, salma, shimaa, nada, yomna
 
 
 // images for game
@@ -15,20 +14,26 @@ PImage start_button;          //start button
 PImage start_button2;         //start button2
 PImage coins;                 // coins 
 PImage gameback;              //game background
+PImage rocks;                 //rocks 
+PImage score_image;           //score image during game
+PImage game_score;            //score image after game finished
 
 // varables of postions and shapes dimensions
-int coin_width=45;                         //coins width
-int coin_height=30;                       //coin height
-int enemy_width = 45;                     //enemy width
-int enemy_height = 30;                    //enemy height
-int player_width = 100;                   //player width
+int coin_width = 45;                          //coins width
+int coin_height = 45;                        //coin height
+int enemy_width = 50;                     //enemy width
+int enemy_height = 50;                   //enemy height
+int player_width = 100;                  //player width
 int player_height = 300;                 //player height
-int player_x=width/2-70;                 //player x position
-int player_y=height-player_height;      //player height position
+int player_x=1300/2-70;                 //player x position
+int player_y=700-player_height;       //player height position
+int rocks_x=0;                             //rocks x pos
+int rocks_y=-560;                             //rocks y pos
+
 
 // variables of levesl and diffculty of game
-int difficulty = 3;          //set difficulty of game
-int limit = 10;          
+int coin_sz=10;              //coins number
+int difficulty = 3;          //set difficulty of game      
 int score = 0;               //score 
 boolean clicked = false;           //check if start  button clicked
 
@@ -39,21 +44,72 @@ coins[] coinss;              //array of coiness -------------------> can be chng
 // check if player died or not
 boolean isCollided = false;
 
-//can be split to 2 functions
-void move(){
-      for(int i = 0; i < enemies.length; i++){
-        if(enemies[i].y > height){
-           enemies[i].y = -10;
-           coinss[i].y = -10;
+
+// move rocks as in background
+void move_rocks()
+{
+  // check if rock position less than end of screen so we can move it down
+  if(rocks_y < height)
+        {
+           rocks_y +=4;
         }
-        enemies[i].show_enemy();
-        enemies[i].drop_enemy((int)random(1, 15));
+        // opacity of picture
+        tint(255, 127); // Display at half opacity 
+        image(rocks,rocks_x,rocks_y,width,height); //show image
+        noTint();
+        // ene opacity
+        //check if rock reach to end screen repeat again
+        if(rocks_y >= height)
+        rocks_y=-560;
         
-        //condition of kill
+        
+}
+
+//move coins 
+void move_coins()
+{
+  //loop on coins if any of them reach the end of screen reset to inital positon
+   for(int i = 0; i < coinss.length; i++){
+        if(coinss[i].y > height)
+        {
+           coinss[i].y = -10; // set coins to inital pos
+        }
+       
+        //condition of eacting coins
         boolean condition_coin_left = coinss[i].x + coinss[i].w >= player_x;
         boolean condition_coin_right = coinss[i].x + coinss[i].w <= player_x + player_width + 4;
         boolean condition_coin_up =  coinss[i].y >= player_y;
         boolean condition_coin_down = coinss[i].y + coinss[i].h <= player_y + player_height;
+      
+         //check if taht coin still alive and had been eaten
+        if(condition_coin_left && condition_coin_right && condition_coin_up && condition_coin_down && coinss[i].alive)
+        {  
+           coinss[i].alive = false;
+           score++;
+        }
+        
+        // if coin still alive show image and increase speed with random number
+        if(coinss[i].alive){
+        coinss[i].show_coins();
+        coinss[i].drop_coins((int)random(1, 15));  // move coins down
+        }
+       
+        
+       
+      }
+    
+}
+
+// similar to coins move function but with no alive conditon
+void move_enemy(){
+      for(int i = 0; i < enemies.length; i++){
+        if(enemies[i].y > height){
+           enemies[i].y = -10;
+         
+        }
+        enemies[i].show_enemy();
+        enemies[i].drop_enemy((int)random(1, 15));
+ 
       
        
        //condition of kill
@@ -62,32 +118,19 @@ void move(){
         boolean conditionUp =  enemies[i].y >= player_y;
         boolean conditionDown = enemies[i].y + enemies[i].h <= player_y + player_height;
       
+      // check if enemy touch player set it is touched
         if(conditionXLeft && conditionXRight && conditionUp && conditionDown){
              isCollided = true;
         }
         
-        
-        // condtion that we need enemy to be disapear
-        if(condition_coin_left && condition_coin_right && condition_coin_up && condition_coin_down)
-        {
-           continue;
-        }
-        coinss[i].show_coins();
-        coinss[i].drop_coins((int)random(1, 15));
-  
+   
       }
      
- /*
-    score += 0.1; // add one if not kill condation is false 
-    //display 
-    fill(0, 102, 153);
-    text("Score: "+(int)score, 10, 40);
-    textSize(25);
-    */
+
 }
 
 
-// draw playe
+// draw player
 void drawPlayer()
 {
   image(player,player_x,player_y,player_width,player_height); 
@@ -95,7 +138,7 @@ void drawPlayer()
 
 
 
-// check keybord movment
+// check if mouse touch start button
 
 void mousepressed(){
   if(mouseX >= width/2-70 && mouseX<= width/2-70+150 && mouseY>= height/2+100 && mouseY<=height/2+100+100 && mousePressed == true)
@@ -129,7 +172,7 @@ class enemy{
     y += speed;
   }
   
-  //show virus shape
+  //show enemy shape
   public void show_enemy()
   {
     image(enemy,x,y,w,h);
@@ -143,6 +186,7 @@ class coins{
   public int y;  // y cordinate
   public int w;  //width
   public int h;  //height
+  public boolean alive = true;   //if not alive => disappear
   
   // constuctior to intialize xcordinate, ycordinate, width and height
   coins(int x, int y, int w, int h)
@@ -167,38 +211,41 @@ class coins{
 }
 /* 
   initalize enmies function 
- to set at random x postion taht enemy fall from also number of enemies
+ to set at random x postion that enemy fall from ,also number of enemies
 */
 void init_enemies(int x_min, int x_max, int size,int coins_size){
   enemies = new enemy[size];  // set number of enemies to array size
-  coinss = new coins[coins_size];
+  coinss = new coins[coins_size]; // set number of coins to array 
+  
+  // loop on enemies to set random x pos
  for(int i = 0; i < enemies.length; i++)
   {
      int x = (int)random(x_min, x_max);//random num from xmin to xmax
-     int y = 5; // startes postition
-     enemies[i] = new enemy(x, y, enemy_width, enemy_height); // set enemy basic valuse
+     int y = -10; // startes postition
+     enemies[i] = new enemy(x, y, enemy_width, enemy_height); 
   }
   for(int i = 0; i < coinss.length; i++)
   {
      int x = (int)random(x_min, x_max);//random num from xmin to xmax
-     int y = 5; // startes postition
-     coinss[i] = new coins(x, y, coin_width, coin_height); // set enemy basic valuse
+     int y = -10; // startes postition
+     coinss[i] = new coins(x, y, coin_width, coin_height); 
   }
 }
 
 void setup(){
   
   size(1300,700);                                     // size of window 
-  img=loadImage("background.png");                     // load background image
+  img=loadImage("background.png");                     // load background starter image
   player=loadImage("player.png");                       //load player image
   enemy = loadImage("enemy.png");                       //load virus image
   start_button = loadImage("start.png");              // load start button
   start_button2 = loadImage("start2.png");            //load start button clicked
-  gameback = loadImage("gameback.jpg");
-  init_enemies(-20, width+20 , difficulty,5);          //call initalize enimies function
-  player_x=width/2-70;
-  player_y=height-300;
-  coins=loadImage("coins.png");
+  gameback = loadImage("gameback.jpg");                //load game background
+  rocks = loadImage("rocks.png");                      //load rocks 
+  score_image = loadImage("score.png");                //load score1 image
+  game_score = loadImage("game_score.png");            //load score2 image
+  init_enemies(-20, width+20 , difficulty,coin_sz);          //call initalize enimies function 
+  coins=loadImage("coins.png");                                //load image of coins
 
   
 }
@@ -207,33 +254,49 @@ void draw(){
    
   
   image(img,0,0,width,height);  // draw start background
-  image(start_button,width/2-70,height/2+100,150,100);
+  image(start_button,width/2-70,height/2+100,150,100); //draw start button image
+  
   //check if we start game
   mousepressed();
- 
   if(clicked)
   {
-      // try to change button when it clicked -----------------------------------------------------
-     //image(start_button2,width/2-70,height/2+100,150,100); // draw button clicked
+    image(gameback,0,0,width,height);
      
-     image(gameback,0,0,width,height);
+     move_rocks();
      drawPlayer();             //draw player 
+   
   
+  //check if player still alive
   if(!isCollided){
-    move();
+    move_enemy();  
+    move_coins();
+   image(score_image,0,10,200,50); //draw score shape
+   // write score
+   textSize(30);
+   text(score,100,45);
     
     if(keyPressed && (key ==CODED))  //check if keypressed 
   {
-    if(keyCode == LEFT)player_x-=10;   //change x depend on key
-    else if(keyCode==RIGHT) player_x+=10;
+    //check if we press left and we didnt reach end of screen
+    if(keyCode == LEFT && player_x>=15)
+    player_x-=15;   //change x depend on key 
+    
+    //check if we press right and we didnt reach end of screen
+    else if(keyCode==RIGHT && player_x<=width-100)
+    player_x+=15;
   }
-    if(score > limit && score < limit + 2){
-      init_enemies(-100, width + 20, difficulty,5); difficulty += 10; limit += 20;
-    }
   }
+  
+  //check if player died 
  else{
-   text("Score: "+(int)score,100, 100);
+   image(gameback,0,0,width,height);                          
+   image(game_score,width/2-300,height/2-300,500,500);       // show final score
+   textSize(50);
+   fill(0,0,0);
+   text(score,width/2-65,height/2+30);
+   
  }
+
 
   
 }}
