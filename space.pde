@@ -1,9 +1,6 @@
-// coins to disappear  =>  done
-// rocks               => doen
-// score  show score   =>doen
-// meetings ---> 5pm
-//meeting has been done and all tasks implmented 
+//new task has been implmented
 //thanks to project team Arwa, salma, shimaa, nada, yomna
+// github repo "https://github.com/shimaahamdy/grphics-project"
 
 
 // images for game
@@ -29,7 +26,7 @@ int player_x=1300/2-70;                 //player x position
 int player_y=700-player_height;       //player height position
 int rocks_x=0;                             //rocks x pos
 int rocks_y=-560;                             //rocks y pos
-
+float angle =0.0;
 
 // variables of levesl and diffculty of game
 int coin_sz=10;              //coins number
@@ -72,16 +69,16 @@ void move_coins()
    for(int i = 0; i < coinss.length; i++){
         if(coinss[i].y > height)
         {
-           coinss[i].y = -10; // set coins to inital pos
+           coinss[i].y = -20; // set coins to inital pos
         }
        
         //condition of eacting coins
-        boolean condition_coin_left = coinss[i].x + coinss[i].w >= player_x;
-        boolean condition_coin_right = coinss[i].x + coinss[i].w <= player_x + player_width + 4;
+        boolean condition_coin_left = coinss[i].x + coinss[i].w >= player_x;  
+        boolean condition_coin_right = coinss[i].x + coinss[i].w <= player_x + player_width + 4; 
         boolean condition_coin_up =  coinss[i].y >= player_y;
         boolean condition_coin_down = coinss[i].y + coinss[i].h <= player_y + player_height;
       
-         //check if taht coin still alive and had been eaten
+         //check if that coin still alive and had been eaten
         if(condition_coin_left && condition_coin_right && condition_coin_up && condition_coin_down && coinss[i].alive)
         {  
            coinss[i].alive = false;
@@ -130,13 +127,20 @@ void move_enemy(){
 }
 
 
-// draw player
-void drawPlayer()
+  
+void rotate_players()
 {
-  image(player,player_x,player_y,player_width,player_height); 
+   pushMatrix();
+translate (200,200);
+rotate(angle);
+ image(player,-50,-150,player_width,player_height);
+ angle+=.1;
+ popMatrix();
+ translate (width-200,200);
+rotate(angle);
+ image(player,-50,-150,player_width,player_height);
+ angle+=.1;
 }
-
-
 
 // check if mouse touch start button
 
@@ -203,7 +207,7 @@ class coins{
     y += speed;
   }
   
-  //show virus shape
+  //show coins shape
   public void show_coins()
   {
     image(coins,x,y,w,h);
@@ -233,7 +237,7 @@ void init_enemies(int x_min, int x_max, int size,int coins_size){
 }
 
 void setup(){
-  
+
   size(1300,700);                                     // size of window 
   img=loadImage("background.png");                     // load background starter image
   player=loadImage("player.png");                       //load player image
@@ -258,42 +262,50 @@ void draw(){
   
   //check if we start game
   mousepressed();
+  
+  //start game if we press mouse
   if(clicked)
   {
     image(gameback,0,0,width,height);
      
      move_rocks();
-     drawPlayer();             //draw player 
+     image(player,player_x,player_y,player_width,player_height);             //draw player 
    
   
   //check if player still alive
-  if(!isCollided){
+  if(!isCollided)
+  {
     move_enemy();  
     move_coins();
    image(score_image,0,10,200,50); //draw score shape
-   // write score
-   textSize(30);
-   text(score,100,45);
-    
-    if(keyPressed && (key ==CODED))  //check if keypressed 
+   
+   // take from keyboard player action
+   if(keyPressed && (key ==CODED))  
   {
     //check if we press left and we didnt reach end of screen
     if(keyCode == LEFT && player_x>=15)
-    player_x-=15;   //change x depend on key 
+    player_x-=30;   //change x depend on key 
     
     //check if we press right and we didnt reach end of screen
     else if(keyCode==RIGHT && player_x<=width-100)
-    player_x+=15;
+    player_x+=30;
   }
+   
+   // write score during game
+   textSize(30);
+   text(score,100,45);
+  
+    
   }
   
-  //check if player died 
+  //if player died 
  else{
    image(gameback,0,0,width,height);                          
    image(game_score,width/2-300,height/2-300,500,500);       // show final score
    textSize(50);
    fill(0,0,0);
    text(score,width/2-65,height/2+30);
+   rotate_players();  //translate and rotation player
    
  }
 
